@@ -123,20 +123,20 @@ To filter a notes resource by title to match term "first" append the __filter__ 
     http://localhost:3000/notes?filter={"title":"first"}
 
 ## Paginate
-Requests that return multiple items in `query` will be paginated to 100 items by default. You can set the `pageSize`
+Requests that return multiple items in `query` will be paginated to 100 items by default. You can set the `limit`
 (number min=1) by adding it to the options.
 
 ```javascript
 var options = {
-	pageSize: 2
+	limit: 2
 };
 
 var notes = restifyMongoose(Note, options);
 ```
 
-or as query string parameter `pageSize` (which will have the presedence)
+or as query string parameter `limit` (which will have the presedence)
 
-    http://localhost:3000/notes?pageSize=2
+    http://localhost:3000/notes?limit=2
 
 
 You can specify further pages with the __p__ parameter and a page number.
@@ -175,7 +175,7 @@ The possible `rel` values are:
 
 ### Total Count Header
 The total number of results/resources returned in `query` is sent in the `X-Total-Count Header` and is not affected by
-pagination (setting `pageSize` and __p__ parameter). It does take in account filter and query parameter ( __q__ ).
+pagination (setting `limit` and __p__ parameter). It does take in account filter and query parameter ( __q__ ).
 
 ## Order
 Order parameters are passed by query string parameter __order__.

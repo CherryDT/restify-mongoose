@@ -261,8 +261,8 @@ describe('restify-mongoose', function () {
 
     after(mongoTest.disconnect());
 
-    it('should limit notes returned to pageSize', function (done) {
-      request(server({pageSize: 2}))
+    it('should limit notes returned to limit', function (done) {
+      request(server({limit: 2}))
         .get('/notes')
         .expect(200)
         .expect(function (res) {
@@ -271,8 +271,8 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should split pages by pageSize', function (done) {
-      request(server({pageSize: 2}))
+    it('should split pages by limit', function (done) {
+      request(server({limit: 2}))
         .get('/notes?p=2')
         .expect(200)
         .expect(function (res) {
@@ -281,9 +281,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should use req.query.pageSize if positive number', function (done) {
+    it('should use req.query.limit if positive number', function (done) {
       request(server())
-        .get('/notes?pageSize=3')
+        .get('/notes?limit=3')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(3);
@@ -291,9 +291,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should not execute queries with req.query.pageSize above maxPageSize option', function (done) {
-      request(server({ pageSize: 1, maxPageSize: 2 }))
-        .get('/notes?pageSize=3')
+    it('should not execute queries with req.query.limit above maxPageSize option', function (done) {
+      request(server({ limit: 1, maxPageSize: 2 }))
+        .get('/notes?limit=3')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(2);
@@ -301,9 +301,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should override with req.query.pageSize if options.pageSize set', function (done) {
-      request(server({pageSize: 1}))
-        .get('/notes?pageSize=3')
+    it('should override with req.query.limit if options.limit set', function (done) {
+      request(server({limit: 1}))
+        .get('/notes?limit=3')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(3);
@@ -311,9 +311,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should go back to options.pageSize if req.query.pageSize removed', function (done) {
-      var agent = request(server({pageSize: 1}));
-      agent.get('/notes?pageSize=3').end(function(){
+    it('should go back to options.limit if req.query.limit removed', function (done) {
+      var agent = request(server({limit: 1}));
+      agent.get('/notes?limit=3').end(function(){
         agent.get('/notes')
           .expect(200)
           .expect(function (res) {
@@ -323,9 +323,9 @@ describe('restify-mongoose', function () {
       });
     });
 
-    it('should not use req.query.pageSize if greater then maxPageSize', function (done) {
-      request(server({pageSize: 1, maxPageSize: 2 }))
-        .get('/notes?pageSize=101')
+    it('should not use req.query.limit if greater then maxPageSize', function (done) {
+      request(server({limit: 1, maxPageSize: 2 }))
+        .get('/notes?limit=101')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(2);
@@ -333,9 +333,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should not use req.query.pageSize if lower then 0', function (done) {
-      request(server({pageSize: 2}))
-        .get('/notes?pageSize=-1')
+    it('should not use req.query.limit if lower then 0', function (done) {
+      request(server({limit: 2}))
+        .get('/notes?limit=-1')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(2);
@@ -343,9 +343,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should not use req.query.pageSize if not a number', function (done) {
-      request(server({pageSize: 2}))
-        .get('/notes?pageSize=abcd')
+    it('should not use req.query.limit if not a number', function (done) {
+      request(server({limit: 2}))
+        .get('/notes?limit=abcd')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(2);
@@ -353,9 +353,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should not use req.query.pageSize if it is 0', function (done) {
-      request(server({pageSize: 2}))
-        .get('/notes?pageSize=0')
+    it('should not use req.query.limit if it is 0', function (done) {
+      request(server({limit: 2}))
+        .get('/notes?limit=0')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(2);
@@ -365,7 +365,7 @@ describe('restify-mongoose', function () {
 
     function assertFirstPage(suffix) {
       return function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes' + suffix)
           .expect(200)
           .expect(function (res) {
@@ -396,8 +396,8 @@ describe('restify-mongoose', function () {
 
     describe('total count header', function () {
       it('should return total count of models if no pagination used', assertTotalCount('5', '', ''));
-      it('should return total count of models if pageSize set but no page selected', assertTotalCount('5', {pageSize: 2}, ''));
-      it('should return total count of models if pageSize set and page selected', assertTotalCount('5', {pageSize: 2}, '?p=1'));
+      it('should return total count of models if limit set but no page selected', assertTotalCount('5', {limit: 2}, ''));
+      it('should return total count of models if limit set and page selected', assertTotalCount('5', {limit: 2}, '?p=1'));
       it('should return total count of models if query is used', assertTotalCount('3', '', '?filter={"content":"a"}'));
       it('should return total count of models if filtering is used', function (done) {
         var svr = server({
@@ -439,7 +439,7 @@ describe('restify-mongoose', function () {
 
     describe('link header', function () {
       it('should include link header with url to next page if more pages', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=1')
           .expect(200)
           .expect(function (res) {
@@ -450,7 +450,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should preserve query parameters across urls in link header', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?q={"content":"a"}')
           .expect(200)
           .expect(function (res) {
@@ -461,7 +461,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should not include next page url in link header if no more pages', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=2')
           .expect(200)
           .expect(function (res) {
@@ -472,7 +472,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include previous page url in link header if not at first page', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=2')
           .expect(200)
           .expect(function (res) {
@@ -483,7 +483,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should not include previous page url in link header if already at first page', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=0')
           .expect(200)
           .expect(function (res) {
@@ -494,7 +494,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include first page url in link header', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=0')
           .expect(200)
           .expect(function (res) {
@@ -505,7 +505,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should support multiple links in link header', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=1')
           .expect(200)
           .expect(function (res) {
@@ -516,7 +516,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include base url paths in link header urls', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com/v1'}))
+        request(server({limit: 2, baseUrl: 'http://example.com/v1'}))
           .get('/notes?p=0')
           .expect(200)
           .expect(function (res) {
@@ -527,7 +527,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include last page url in link header if at first page', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=0')
           .expect(200)
           .expect(function (res) {
@@ -538,7 +538,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include last page url in link header if not at first page', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=1')
           .expect(200)
           .expect(function (res) {
@@ -549,7 +549,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include last page url in link header if at last page', function (done) {
-        request(server({pageSize: 2, baseUrl: 'http://example.com'}))
+        request(server({limit: 2, baseUrl: 'http://example.com'}))
           .get('/notes?p=2')
           .expect(200)
           .expect(function (res) {
@@ -560,7 +560,7 @@ describe('restify-mongoose', function () {
       });
 
       it('should include last page url in link header if page size set to 0', function (done) {
-        request(server({pageSize: 0, baseUrl: 'http://example.com'}))
+        request(server({limit: 0, baseUrl: 'http://example.com'}))
           .get('/notes?p=2')
           .expect(200)
           .expect(function (res) {
