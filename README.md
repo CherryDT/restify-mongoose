@@ -302,6 +302,8 @@ var users = restifyMongoose(User, {outputFormat: 'json-api', modelName: 'admins'
 users.serve('/users', restifyServer);
 ```
 
+Other possible output format is `json-meta`
+
 ## Populating referenced documents
 
 The returned results can use mongoose's "populate" query modifier to populated referenced documents within models.

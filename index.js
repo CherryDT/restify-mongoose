@@ -28,14 +28,19 @@ var emitEvent = function (self, event) {
   };
 };
 
-var sendData = function (res, format, modelName, status) {
+var sendData = function (res, format, modelName, status, meta) {
   return function (model, cb) {
     if (format === 'json-api') {
       var responseObj = {};
       responseObj[modelName] = model;
       res.json(status, responseObj);
-    }
-    else {
+    } else if(format === 'json-meta') {
+      var responseObj = {};
+      responseObj['meta'] = res.meta;
+      responseObj['data'] = model;
+      delete res.meta;
+      return res.json(status, responseObj);
+    } else {
       res.send(status, model);
     }
     cb(undefined, model);
@@ -142,7 +147,7 @@ var parseCommaParam = function(commaParam) {
   return commaParam.replace(/,/g, ' ');
 };
 
-var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
+var applyPageLinks = function (req, res, page, pageSize, baseUrl, outputFormat) {
   function makeLink(page, rel) {
     var path = url.parse(req.url, true);
     path.query.skip = page;
@@ -151,20 +156,41 @@ var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
     return util.format('<%s>; rel="%s"', href, rel);
   }
 
+  function makeMetaLink(page) {
+    var path = url.parse(req.url, true);
+    path.query.skip = page;
+    delete path.search; // required for url.format to re-generate querystring
+    var href = baseUrl + url.format(path);
+    return href;
+  }
+
   return function applyPageLinksInner(models, totalCount, cb) {
+    var meta = res.meta;
     // rel: first
     var link = makeLink(0, 'first');
+    if(outputFormat === 'json-meta') {
+      meta.firstUrl = makeMetaLink(0);
+    }
 
     // rel: prev
     if (page > 0) {
-      link += ', ' + makeLink(page - pageSize, 'prev');
+      link += ', ' + makeLink(Math.max(page - pageSize, 0), 'prev');
+      if(outputFormat === 'json-meta') {
+        meta.prevUrl = makeMetaLink(Math.max(page - pageSize, 0));
+      }
     }
 
     // rel: next
     var moreResults = models.length > pageSize;
+    if(outputFormat === 'json-meta') {
+      meta.hasNext = moreResults;
+    }
     if (moreResults) {
       models.pop();
       link += ', ' + makeLink(page + pageSize, 'next');
+      if(outputFormat === 'json-meta') {
+        meta.nextUrl = makeMetaLink(page + pageSize);
+      }
     }
 
     // rel: last
@@ -172,6 +198,9 @@ var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
     if (pageSize > 0) {
       lastPage = Math.max(totalCount - pageSize, 0);
       link += ', ' + makeLink(lastPage, 'last');
+      if(outputFormat === 'json-meta') {
+        meta.lastUrl = makeMetaLink(lastPage);
+      }
     }
 
     res.setHeader('link', link);
@@ -180,10 +209,12 @@ var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
   };
 };
 
-var applyTotalCount = function (res) {
+var applyTotalCount = function (res, outputFormat) {
   return function applyTotalCountInner(models, totalCount, cb) {
     res.setHeader('X-Total-Count', totalCount);
-
+    if(outputFormat === 'json-meta') {
+      res.meta.total = totalCount;
+    }
     cb(null, models);
   };
 };
@@ -277,14 +308,23 @@ Resource.prototype.query = function (options) {
     query.skip(pageSize * page);
     query.limit(pageSize + 1);
 
+    if(options.outputFormat === 'json-meta') {
+      res.meta = {
+        skip: page,
+        limit: pageSize,
+        model: options.modelName
+      };
+    }
+
     async.waterfall([
       execQueryWithTotCount(query, countQuery),
-      applyPageLinks(req, res, page, pageSize, options.baseUrl),
-      applyTotalCount(res),
+      applyPageLinks(req, res, page, pageSize, options.baseUrl, options.outputFormat),
+      applyTotalCount(res, options.outputFormat),
       buildProjections(req, options.projection),
       emitEvent(self, 'query'),
       sendData(res, options.outputFormat, options.modelName)
     ], next);
+
   };
 };
 

@@ -1472,6 +1472,19 @@ describe('restify-mongoose', function () {
         })
         .end(done);
     });
+
+    it('should return json-meta format if defined in options', function (done) {
+      request(server({outputFormat: 'json-meta'}))
+        .get('/notes')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .expect(function (res) {
+          res.body.should.have.property("data");
+          res.body.should.have.property("meta");
+          res.body.meta.should.have.property("model");
+        })
+        .end(done);
+    });
   });
 
   describe('errors', function () {

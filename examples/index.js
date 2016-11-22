@@ -16,7 +16,7 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
-var notes = restifyMongoose(models.Note);
+var notes = restifyMongoose(models.Note, {outputFormat: 'json-meta'});
 
 // Serve model Notes as a REST API
 server.get('/notes', notes.query());
