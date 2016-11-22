@@ -177,27 +177,27 @@ The possible `rel` values are:
 The total number of results/resources returned in `query` is sent in the `X-Total-Count Header` and is not affected by
 pagination (setting `pageSize` and __p__ parameter). It does take in account filter and query parameter ( __q__ ).
 
-## Sort
-Sort parameters are passed by query string parameter __sort__.
+## Order
+Order parameters are passed by query string parameter __order__.
 
-Sort parameters can be separated by comma or space. They will be passed directly to [mongoose sort query function](http://mongoosejs.com/docs/api.html#query_Query-sort).
+Order parameters can be separated by comma or space. They will be passed directly to [mongoose sort query function](http://mongoosejs.com/docs/api.html#query_Query-sort).
 
-To sort a notes resource by title descending append the __sort__ query parameter to the URL:
+To order a notes resource by title descending append the __order__ query parameter to the URL:
 
-    http://localhost:3000/notes?sort=-title
+    http://localhost:3000/notes?order=-title
 
-You can also define a default sort in the options object. This option will by ignored if a __sort__ query parameter exists.
+You can also define a default order in the options object. This option will by ignored if a __order__ query parameter exists.
 
 Using in the constructor:
 ```javascript
-var notes = restifyMongoose(Note, {sort: '-title'});
+var notes = restifyMongoose(Note, {order: '-title'});
 notes.serve('/notes', restifyServer);
 ```
 
 Using for query or detail methods:
 ```javascript
 var notes = restifyMongoose(Note);
-note.query({sort: '-title'});
+note.query({order: '-title'});
 
 ## Select Fields
 To restrict selected columns you can pass a query string parameter __select__.

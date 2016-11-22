@@ -205,7 +205,7 @@ var applyPopulate = function(query, options, req){
 };
 
 var applySort = function(query, options, req){
-  var sort = req.query.sort || options.sort;
+  var sort = req.query.order || options.order;
   if (sort) {
     query = query.sort(parseCommaParam(sort));
   }
@@ -244,7 +244,7 @@ Resource.prototype.query = function (options) {
   options.modelName = options.modelName || this.options.modelName;
   options.populate = options.populate || this.options.populate;
   options.select = options.select || this.options.select;
-  options.sort = options.sort || this.options.sort;
+  options.order = options.order || this.options.order;
 
   return function (req, res, next) {
     var query = self.Model.find({});
