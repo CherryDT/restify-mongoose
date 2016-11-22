@@ -3,8 +3,8 @@
 
 [![Build Status](https://travis-ci.org/saintedlama/restify-mongoose.png?branch=master)](https://travis-ci.org/saintedlama/restify-mongoose)
 [![Coverage Status](https://coveralls.io/repos/saintedlama/restify-mongoose/badge.png?branch=master)](https://coveralls.io/r/saintedlama/restify-mongoose?branch=master)
-[![Dependencies Status](https://david-dm.org/saintedlama/restify-mongoose.svg)](https://david-dm.org/saintedlama/restify-mongoose)
-[![devDependency Status](https://david-dm.org/saintedlama/restify-mongoose/dev-status.svg)](https://david-dm.org/saintedlama/restify-mongoose#info=devDependencies)
+[![Dependencies Status](https://david-dm.org/Andras-Simon/restify-mongoose.svg)](https://david-dm.org/saintedlama/restify-mongoose)
+[![devDependency Status](https://david-dm.org/Andras-Simon/restify-mongoose/dev-status.svg)](https://david-dm.org/saintedlama/restify-mongoose#info=devDependencies)
 
 Restify-Mongoose provides a resource abstraction for [restify](http://mcavage.me/node-restify/) to expose mongoose models as REST resources.
 
