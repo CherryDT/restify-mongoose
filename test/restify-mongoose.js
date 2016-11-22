@@ -159,9 +159,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should sort notes', function (done) {
+    it('should order notes', function (done) {
       request(server())
-        .get('/notes?sort=-title')
+        .get('/notes?order=-title')
         .expect('Content-Type', /json/)
         .expect(200)
         .expect(function (res) {
@@ -172,8 +172,8 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should sort notes according to options', function (done) {
-      request(server({'sort':'-title'}))
+    it('should order notes according to options', function (done) {
+      request(server({'order':'-title'}))
         .get('/notes')
         .expect('Content-Type', /json/)
         .expect(200)
@@ -185,9 +185,9 @@ describe('restify-mongoose', function () {
         .end(done);
     });
 
-    it('should sort notes according to query, overriding options', function (done) {
-      request(server({'sort':'title'}))
-        .get('/notes?sort=-title')
+    it('should order notes according to query, overriding options', function (done) {
+      request(server({'order':'title'}))
+        .get('/notes?order=-title')
         .expect('Content-Type', /json/)
         .expect(200)
         .expect(function (res) {
