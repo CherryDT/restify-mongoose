@@ -250,9 +250,9 @@ Resource.prototype.query = function (options) {
     var query = self.Model.find({});
     var countQuery = self.Model.find({});
 
-    if (req.query.q) {
+    if (req.query.filter) {
       try {
-        var q = JSON.parse(req.query.q);
+        var q = JSON.parse(req.query.filter);
         query = query.where(q);
         countQuery = countQuery.where(q);
       } catch (err) {

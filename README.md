@@ -114,13 +114,13 @@ restifyMongoose(models.Note).serve('/api/notes', server, { before: jwt({secret: 
 ```
 
 ## Queries
-Query parameters are passed by query string parameter __q__.
+Query parameters are passed by query string parameter __filter__.
 
 Query parameters are parsed as JSON objects and passed to [mongoose where query function](http://mongoosejs.com/docs/api.html#query_Query-where).
 
-To filter a notes resource by title to match term "first" append the __q__ query parameter to the URL:
+To filter a notes resource by title to match term "first" append the __filter__ query parameter to the URL:
 
-    http://localhost:3000/notes?q={"title":"first"}
+    http://localhost:3000/notes?filter={"title":"first"}
 
 ## Paginate
 Requests that return multiple items in `query` will be paginated to 100 items by default. You can set the `pageSize`

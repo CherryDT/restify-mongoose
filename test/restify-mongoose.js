@@ -59,7 +59,7 @@ describe('restify-mongoose', function () {
 
     it('should filter notes according to query', function (done) {
       request(server())
-        .get('/notes?q={"title":"first"}')
+        .get('/notes?filter={"title":"first"}')
         .expect('Content-Type', /json/)
         .expect(200)
         .expect(function (res) {
@@ -135,7 +135,7 @@ describe('restify-mongoose', function () {
 
     it('should fail on invalid query', function (done) {
       request(server())
-        .get('/notes?q={title"first"}')
+        .get('/notes?filter={title"first"}')
         .expect('Content-Type', /json/)
         .expect(400)
         .end(done);
@@ -398,7 +398,7 @@ describe('restify-mongoose', function () {
       it('should return total count of models if no pagination used', assertTotalCount('5', '', ''));
       it('should return total count of models if pageSize set but no page selected', assertTotalCount('5', {pageSize: 2}, ''));
       it('should return total count of models if pageSize set and page selected', assertTotalCount('5', {pageSize: 2}, '?p=1'));
-      it('should return total count of models if query is used', assertTotalCount('3', '', '?q={"content":"a"}'));
+      it('should return total count of models if query is used', assertTotalCount('3', '', '?filter={"content":"a"}'));
       it('should return total count of models if filtering is used', function (done) {
         var svr = server({
           filter: function () {
