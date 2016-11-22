@@ -145,7 +145,7 @@ var parseCommaParam = function(commaParam) {
 var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
   function makeLink(page, rel) {
     var path = url.parse(req.url, true);
-    path.query.p = page;
+    path.query.skip = page;
     delete path.search; // required for url.format to re-generate querystring
     var href = baseUrl + url.format(path);
     return util.format('<%s>; rel="%s"', href, rel);
@@ -157,21 +157,20 @@ var applyPageLinks = function (req, res, page, pageSize, baseUrl) {
 
     // rel: prev
     if (page > 0) {
-      link += ', ' + makeLink(page - 1, 'prev');
+      link += ', ' + makeLink(page - pageSize, 'prev');
     }
 
     // rel: next
     var moreResults = models.length > pageSize;
     if (moreResults) {
       models.pop();
-
-      link += ', ' + makeLink(page + 1, 'next');
+      link += ', ' + makeLink(page + pageSize, 'next');
     }
 
     // rel: last
     var lastPage = 0;
     if (pageSize > 0) {
-      lastPage = Math.ceil(totalCount / pageSize) - 1;
+      lastPage = Math.max(totalCount - pageSize, 0);
       link += ', ' + makeLink(lastPage, 'last');
     }
 
@@ -269,7 +268,7 @@ Resource.prototype.query = function (options) {
       countQuery = countQuery.where(self.options.filter(req, res));
     }
     
-    var page = Number(req.query.p) >= 0 ? Number(req.query.p) : 0;
+    var page = Number(req.query.skip) >= 0 ? Number(req.query.skip) : 0;
 
     // pageSize parameter in queryString overrides one in the code. Must be number between [1-options.maxPageSize]
     var requestedPageSize = Number(req.query.limit) > 0 ? Number(req.query.limit) : options.limit;

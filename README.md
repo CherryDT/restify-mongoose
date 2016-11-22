@@ -139,9 +139,9 @@ or as query string parameter `limit` (which will have the presedence)
     http://localhost:3000/notes?limit=2
 
 
-You can specify further pages with the __p__ parameter and a page number.
+You can specify further pages with the __skip__ parameter and a page number.
 
-    http://localhost:3000/notes?p=1
+    http://localhost:3000/notes?skip=10
 
 An additional restriction to page sizes can be made with `maxPageSize` option (default value is 100) that defines the
 maximum allowed page size to avoid unbound queries.
@@ -151,10 +151,10 @@ The pagination info is included in [the Link header](http://tools.ietf.org/html/
 these Link header values instead of constructing your own URLs.
 
     link:
-    <http://example.com/notes?p=0>; rel="first",
-    <http://example.com/notes?p=1>; rel="prev",
-    <http://example.com/notes/?p=3>; rel="next",
-    <http://example.com/notes/?p=4>; rel="last"
+    <http://example.com/notes?skip=0>; rel="first",
+    <http://example.com/notes?skip=1>; rel="prev",
+    <http://example.com/notes/?skip=3>; rel="next",
+    <http://example.com/notes/?p=skip=4>; rel="last"
 
 _Linebreak is included for readability._
 
@@ -175,7 +175,7 @@ The possible `rel` values are:
 
 ### Total Count Header
 The total number of results/resources returned in `query` is sent in the `X-Total-Count Header` and is not affected by
-pagination (setting `limit` and __p__ parameter). It does take in account filter and query parameter ( __q__ ).
+pagination (setting `limit` and __skip__ parameter). It does take in account filter and query parameter ( __filter__ ).
 
 ## Order
 Order parameters are passed by query string parameter __order__.

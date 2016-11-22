@@ -273,7 +273,7 @@ describe('restify-mongoose', function () {
 
     it('should split pages by limit', function (done) {
       request(server({limit: 2}))
-        .get('/notes?p=2')
+        .get('/notes?skip=2')
         .expect(200)
         .expect(function (res) {
           res.body.should.have.lengthOf(1);
@@ -440,29 +440,29 @@ describe('restify-mongoose', function () {
     describe('link header', function () {
       it('should include link header with url to next page if more pages', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=1')
+          .get('/notes?skip=0')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=2>; rel="next"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=2>; rel="next"'));
           })
           .end(done);
       });
 
       it('should preserve query parameters across urls in link header', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?q={"content":"a"}')
+          .get('/notes?filter={"content":"a"}')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?q=' + encodeURIComponent('{"content":"a"}') + '&p=1>; rel="next"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?filter=' + encodeURIComponent('{"content":"a"}') + '&skip=2>; rel="next"'));
           })
           .end(done);
       });
 
       it('should not include next page url in link header if no more pages', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=2')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
@@ -473,11 +473,11 @@ describe('restify-mongoose', function () {
 
       it('should include previous page url in link header if not at first page', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=2')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=1>; rel="prev"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=0>; rel="prev"'));
           })
           .end(done);
       });
@@ -495,18 +495,18 @@ describe('restify-mongoose', function () {
 
       it('should include first page url in link header', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=0')
+          .get('/notes?skip=0')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=0>; rel="first"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=0>; rel="first"'));
           })
           .end(done);
       });
 
       it('should support multiple links in link header', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=1')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.link.should.match(/rel="first", <http/);
@@ -517,55 +517,55 @@ describe('restify-mongoose', function () {
 
       it('should include base url paths in link header urls', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com/v1'}))
-          .get('/notes?p=0')
+          .get('/notes?skip=0')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/v1/notes\\?p=0>; rel="first"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/v1/notes\\?skip=0>; rel="first"'));
           })
           .end(done);
       });
 
       it('should include last page url in link header if at first page', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=0')
+          .get('/notes?skip=0')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=2>; rel="last"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=4>; rel="last"'));
           })
           .end(done);
       });
 
       it('should include last page url in link header if not at first page', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=1')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=2>; rel="last"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=4>; rel="last"'));
           })
           .end(done);
       });
 
       it('should include last page url in link header if at last page', function (done) {
         request(server({limit: 2, baseUrl: 'http://example.com'}))
-          .get('/notes?p=2')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=2>; rel="last"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=4>; rel="last"'));
           })
           .end(done);
       });
 
       it('should include last page url in link header if page size set to 0', function (done) {
         request(server({limit: 0, baseUrl: 'http://example.com'}))
-          .get('/notes?p=2')
+          .get('/notes?skip=2')
           .expect(200)
           .expect(function (res) {
             res.headers.should.have.property("link");
-            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?p=0>; rel="last"'));
+            res.headers.link.should.match(new RegExp('<http://example.com/notes\\?skip=0>; rel="last"'));
           })
           .end(done);
       });
