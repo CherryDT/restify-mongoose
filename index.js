@@ -42,7 +42,7 @@ var sendData = function (res, format, modelName, status, meta) {
         delete res.meta;
         return res.json(status, responseObj);
       } 
-      return res.json(model, responseObj);
+      return res.json(status, model);
     } else {
       res.send(status, model);
     }
