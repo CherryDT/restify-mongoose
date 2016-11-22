@@ -454,7 +454,7 @@ Resource.prototype.remove = function () {
           return next(err);
         }
 
-        res.send(200, model);
+        res.send(204);
         emitRemove(model, next);
       });
     });
