@@ -1081,8 +1081,7 @@ describe('restify-mongoose', function () {
 
         request(server())
           .del('/notes/' + note.id)
-          .expect('Content-Type', /json/)
-          .expect(200)
+          .expect(204)
           .end(done);
       });
     });
@@ -1144,8 +1143,7 @@ describe('restify-mongoose', function () {
 
         request(svr)
           .del('/notes/' + note.id)
-          .expect('Content-Type', /json/)
-          .expect(200)
+          .expect(204)
           .expect(function () {
             eventEmitted.should.be.ok;
             eventArg.should.be.ok;
@@ -1381,12 +1379,7 @@ describe('restify-mongoose', function () {
 
         request(svr)
           .del('/servenotes/' + note.id)
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .expect(function (res) {
-            beforeCalled.should.matchEach(true);
-            afterCalled.should.matchEach(true);
-          })
+          .expect(204)
           .end(done);
       });
     });
