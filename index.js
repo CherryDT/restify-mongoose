@@ -35,11 +35,14 @@ var sendData = function (res, format, modelName, status, meta) {
       responseObj[modelName] = model;
       res.json(status, responseObj);
     } else if(format === 'json-meta') {
-      var responseObj = {};
-      responseObj['meta'] = res.meta;
-      responseObj['data'] = model;
-      delete res.meta;
-      return res.json(status, responseObj);
+      if(model instanceof Array) {
+        var responseObj = {};
+        responseObj['meta'] = res.meta;
+        responseObj['data'] = model;
+        delete res.meta;
+        return res.json(status, responseObj);
+      } 
+      return res.json(model, responseObj);
     } else {
       res.send(status, model);
     }
