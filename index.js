@@ -371,6 +371,7 @@ Resource.prototype.insert = function (options) {
   options.beforeSave = options.beforeSave || this.options.beforeSave;
   options.outputFormat = options.outputFormat || this.options.outputFormat;
   options.modelName = options.modelName || this.options.modelName;
+  options.projection = options.projection || this.options.detailProjection;
 
   return function (req, res, next) {
     var model = new self.Model(req.body);
@@ -378,6 +379,7 @@ Resource.prototype.insert = function (options) {
       execBeforeSave(req, model, options.beforeSave),
       execSave(model),
       setLocationHeader(req, res, true, options.baseUrl),
+      buildProjection(req, options.projection),
       emitEvent(self, 'insert'),
       sendData(res, options.outputFormat, options.modelName, 201)
     ], next);
@@ -392,6 +394,7 @@ Resource.prototype.update = function (options) {
   options.beforeSave = options.beforeSave || this.options.beforeSave;
   options.outputFormat = options.outputFormat || this.options.outputFormat;
   options.modelName = options.modelName || this.options.modelName;
+  options.projection = options.projection || this.options.detailProjection;
 
   return function (req, res, next) {
     var find = {};
@@ -422,6 +425,7 @@ Resource.prototype.update = function (options) {
         execBeforeSave(req, model, options.beforeSave),
         execSave(model),
         setLocationHeader(req, res, false, options.baseUrl),
+        buildProjection(req, options.projection),
         emitEvent(self, 'update'),
         sendData(res, options.outputFormat, options.modelName)
       ], next);
