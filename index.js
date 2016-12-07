@@ -6,16 +6,40 @@ var url = require('url');
 var EventEmitter = require('events').EventEmitter;
 
 var restifyError = function (err) {
-  if ('ValidationError' !== err.name) {
-    return err;
+  if(err.statusCode) return err;
+
+  switch(err.name) {
+    case 'ValidationError':
+      return new restify.InvalidContentError({
+        body: {
+          message: 'Validation failed',
+          errors: err.errors
+        }
+      });
+    case 'CastError':
+      if(err.path == '_id') {
+        return new restify.ResourceNotFoundError(err.stringValue);
+      } else {
+        return new restify.BadRequestError({
+          body: err
+        });
+      }
+    case 'MongoError':
+      if(err.code == 11000) {
+        var dupKeyMatch = err.errmsg.match(/dup key: (\{.*\})/);
+        return new restify.ConflictError({
+          body: {
+            message: 'Duplicate primary key, resource already exists',
+            duplicateKey: dupKeyMatch ? dupKeyMatch[1] : undefined
+          }
+        });
+      } else {
+        break;
+      }
   }
 
-  return new restify.InvalidContentError({
-    body: {
-      message: 'Validation failed',
-      errors: err.errors
-    }
-  });
+  console.error('Converted error to InternalServerError', err);
+  return new restify.InternalServerError(err.name);
 };
 
 var emitEvent = function (self, event) {
@@ -50,7 +74,7 @@ var sendData = function (res, format, modelName, status, meta) {
   };
 };
 
-var execQueryWithTotCount = function (query, countQuery) {
+var execQueryWithTotCount = function (query, countQuery, errHandler) {
   return function (cb) {
     async.parallel({
         models: function (callback) {
@@ -62,6 +86,7 @@ var execQueryWithTotCount = function (query, countQuery) {
       },
       function (err, results) {
         if (err) {
+          if (errHandler) err = errHandler(err) || err;
           return cb(restifyError(err));
         }
         else {
@@ -72,9 +97,16 @@ var execQueryWithTotCount = function (query, countQuery) {
   };
 };
 
-var execQuery = function (query) {
+var execQuery = function (query, errHandler) {
   return function (cb) {
-    query.exec(cb);
+    query.exec(function(err, results) {
+      if (err) {
+        if (errHandler) err = errHandler(err) || err;
+        return cb(restifyError(err));
+      } else {
+        cb(null, results);
+      }
+    });
   };
 };
 
@@ -89,10 +121,11 @@ var execBeforeSave = function (req, model, beforeSave) {
   };
 };
 
-var execSave = function (model) {
+var execSave = function (model, errHandler) {
   return function (cb) {
     model.save(function (err, model) {
       if (err) {
+        if (errHandler) err = errHandler(err) || err;
         return cb(restifyError(err));
       }
       else {
