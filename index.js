@@ -179,6 +179,18 @@ var buildProjection = function (req, projection) {
   };
 };
 
+var prepareObject = function (projection, fieldsToBeRemoved) {
+  return function (req, model, cb) {
+    projection(req, model, function(err, model) {
+      var obj = (model && model.toObject) ? model.toObject() : model;
+      if(typeof obj == "object") (fieldsToBeRemoved || []).forEach(function(f) {
+        delete obj[f];
+      });
+      cb(err, obj);
+    });
+  };
+};
+
 var parseCommaParam = function(commaParam) {
   return commaParam.replace(/,/g, ' ');
 };
@@ -294,6 +306,7 @@ var Resource = function (Model, options) {
   this.options.detailProjection = this.options.detailProjection || function (req, item, cb) {
       cb(null, item);
     };
+  this.options.fieldsToBeRemoved = this.options.fieldsToBeRemoved || [];
 };
 
 util.inherits(Resource, EventEmitter);
@@ -311,6 +324,7 @@ Resource.prototype.query = function (options) {
   options.populate = options.populate || this.options.populate;
   options.select = options.select || this.options.select;
   options.order = options.order || this.options.order;
+  options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
     var query = self.Model.find({});
@@ -356,7 +370,7 @@ Resource.prototype.query = function (options) {
       execQueryWithTotCount(query, countQuery),
       applyPageLinks(req, res, page, pageSize, options.baseUrl, options.outputFormat),
       applyTotalCount(res, options.outputFormat),
-      buildProjections(req, options.projection),
+      buildProjections(req, prepareObject(options.projection, options.fieldsToBeRemoved)),
       emitEvent(self, 'query'),
       sendData(res, options.outputFormat, options.modelName)
     ], next);
@@ -373,6 +387,7 @@ Resource.prototype.detail = function (options) {
   options.modelName = options.modelName || this.options.modelName;
   options.populate = options.populate || this.options.populate;
   options.select = options.select || this.options.select;
+  options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
     var find = {};
@@ -389,7 +404,7 @@ Resource.prototype.detail = function (options) {
 
     async.waterfall([
       execQuery(query),
-      buildProjection(req, options.projection),
+      buildProjection(req, prepareObject(options.projection, options.fieldsToBeRemoved)),
       emitEvent(self, 'detail'),
       sendData(res, options.outputFormat, options.modelName)
     ], next);
@@ -405,6 +420,7 @@ Resource.prototype.insert = function (options) {
   options.outputFormat = options.outputFormat || this.options.outputFormat;
   options.modelName = options.modelName || this.options.modelName;
   options.projection = options.projection || this.options.detailProjection;
+  options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
     var model = new self.Model(req.body);
@@ -412,7 +428,7 @@ Resource.prototype.insert = function (options) {
       execBeforeSave(req, model, options.beforeSave),
       execSave(model),
       setLocationHeader(req, res, true, options.baseUrl),
-      buildProjection(req, options.projection),
+      buildProjection(req, prepareObject(options.projection, options.fieldsToBeRemoved)),
       emitEvent(self, 'insert'),
       sendData(res, options.outputFormat, options.modelName, 201)
     ], next);
@@ -428,6 +444,7 @@ Resource.prototype.update = function (options) {
   options.outputFormat = options.outputFormat || this.options.outputFormat;
   options.modelName = options.modelName || this.options.modelName;
   options.projection = options.projection || this.options.detailProjection;
+  options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
     var find = {};
@@ -458,7 +475,7 @@ Resource.prototype.update = function (options) {
         execBeforeSave(req, model, options.beforeSave),
         execSave(model),
         setLocationHeader(req, res, false, options.baseUrl),
-        buildProjection(req, options.projection),
+        buildProjection(req, prepareObject(options.projection, options.fieldsToBeRemoved)),
         emitEvent(self, 'update'),
         sendData(res, options.outputFormat, options.modelName)
       ], next);

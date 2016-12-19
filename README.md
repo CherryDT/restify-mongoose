@@ -1,15 +1,11 @@
 # Restify-Mongoose
-[![Build Status](https://travis-ci.org/Andras-Simon/restify-mongoose.png?branch=master)](https://travis-ci.org/Andras-Simon/restify-mongoose)
-[![Coverage Status](https://coveralls.io/repos/github/Andras-Simon/restify-mongoose/badge.svg?branch=master)](https://coveralls.io/github/Andras-Simon/restify-mongoose?branch=master)
-[![Dependencies Status](https://david-dm.org/Andras-Simon/restify-mongoose.svg)](https://david-dm.org/Andras-Simon/restify-mongoose)
-[![devDependency Status](https://david-dm.org/Andras-Simon/restify-mongoose/dev-status.svg)](https://david-dm.org/Andras-Simon/restify-mongoose#info=devDependencies)
 
 Restify-Mongoose provides a resource abstraction for [restify](http://mcavage.me/node-restify/) to expose mongoose models as REST resources.
 
 ## Getting started
-First you'll need to install restify-mongoose via npm
+~~First you'll need to install restify-mongoose via npm~~ **This fork is currently not on NPM**
 
-    npm install restify-mongoose
+    npm install ...???
 
 Second step is to wire up mongoose and restify using restify-mongoose
 
@@ -287,6 +283,10 @@ var users = restifyMongoose(User);
 users.detail({projection: userProjection});
 users.query({projection: userProjection});
 ```
+
+## Fields to be removed
+A list of fields to be removed from the output (_after_ projections were applied) can be specified as options member `fieldsToBeRemoved` (a string array). The global and local options are merged.
+
 ## Output format
 
 The output format can be changed to a more compatible one with the [json-api](http://jsonapi.org/format/) standard to use the API with frameworks like Ember.
