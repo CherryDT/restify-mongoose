@@ -423,6 +423,10 @@ Resource.prototype.insert = function (options) {
   options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
+    options.fieldsToBeRemoved.forEach(function(field) {
+      delete req.body[field];
+    });
+
     var model = new self.Model(req.body);
     async.waterfall([
       execBeforeSave(req, model, options.beforeSave),
@@ -447,6 +451,10 @@ Resource.prototype.update = function (options) {
   options.fieldsToBeRemoved = (options.fieldsToBeRemoved || []).concat(this.options.fieldsToBeRemoved || []);
 
   return function (req, res, next) {
+    options.fieldsToBeRemoved.forEach(function(field) {
+      delete req.body[field];
+    });
+    
     var find = {};
     find[self.options.queryString] = req.params.id;
 

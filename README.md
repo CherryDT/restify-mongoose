@@ -285,7 +285,7 @@ users.query({projection: userProjection});
 ```
 
 ## Fields to be removed
-A list of fields to be removed from the output (_after_ projections were applied) can be specified as options member `fieldsToBeRemoved` (a string array). The global and local options are merged. This feature can be used to easily filter unwanted fields, even when they are used in a virtual.
+A list of fields to be removed from the output (_after_ projections were applied) and from the insert/update input body can be specified as options member `fieldsToBeRemoved` (a string array). The global and local options are merged. This feature can be used to easily filter unwanted fields, even when they are used in a virtual.
 
 ## Output format
 
