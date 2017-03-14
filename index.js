@@ -349,6 +349,11 @@ Resource.prototype.query = function (options) {
       countQuery = countQuery.where(self.options.filter(req, res));
     }
     
+    if (options.filter) {
+      query = query.where(options.filter(req, res));
+      countQuery = countQuery.where(options.filter(req, res));
+    }
+    
     var page = Number(req.query.skip) >= 0 ? Number(req.query.skip) : 0;
 
     // pageSize parameter in queryString overrides one in the code. Must be number between [1-options.maxPageSize]
@@ -400,6 +405,10 @@ Resource.prototype.detail = function (options) {
 
     if (self.options.filter) {
       query = query.where(self.options.filter(req, res));
+    }
+
+    if (options.filter) {
+      query = query.where(options.filter(req, res));
     }
 
     async.waterfall([
@@ -464,6 +473,10 @@ Resource.prototype.update = function (options) {
       query = query.where(self.options.filter(req, res));
     }
 
+    if (options.filter) {
+      query = query.where(options.filter(req, res));
+    }
+
     query.exec(function (err, model) {
       if (err) {
         return next(err);
@@ -491,7 +504,7 @@ Resource.prototype.update = function (options) {
   };
 };
 
-Resource.prototype.remove = function () {
+Resource.prototype.remove = function (options) {
   var self = this;
   var emitRemove = emitEvent(self, 'remove');
 
@@ -503,6 +516,10 @@ Resource.prototype.remove = function () {
 
     if (self.options.filter) {
       query = query.where(self.options.filter(req, res));
+    }
+
+    if (options.filter) {
+      query = query.where(options.filter(req, res));
     }
 
     query.exec(function (err, model) {
