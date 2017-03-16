@@ -506,6 +506,7 @@ Resource.prototype.update = function (options) {
 
 Resource.prototype.remove = function (options) {
   var self = this;
+  options = options || {};
   var emitRemove = emitEvent(self, 'remove');
 
   return function (req, res, next) {
