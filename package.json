@@ -1,6 +1,6 @@
 {
   "name": "restify-mongoose",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Expose mongoose models as REST resources",
   "author": "christoph.walcher@gmail.com",
   "contributors": [
