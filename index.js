@@ -65,7 +65,7 @@ var sendData = function (res, format, modelName, status, meta) {
         responseObj['data'] = model;
         delete res.meta;
         return res.json(status, responseObj);
-      } 
+      }
       return res.json(status, model);
     } else {
       res.send(status, model);
@@ -329,31 +329,34 @@ Resource.prototype.query = function (options) {
   return function (req, res, next) {
     var query = self.Model.find({});
     var countQuery = self.Model.find({});
+    var filters = [];
 
     if (req.query.filter) {
       try {
         var q = JSON.parse(req.query.filter);
-        query = query.where(q);
-        countQuery = countQuery.where(q);
+        filters.push(q);
       } catch (err) {
         return res.send(400, {message: 'Query is not a valid JSON object', errors: err});
       }
+    }
+
+    if (self.options.filter) {
+      filters.push(self.options.filter(req, res));
+    }
+
+    if (options.filter) {
+      filters.push(options.filter(req, res));
+    }
+
+    if (filters.length) {
+      query.where({$and: filters});
+      countQuery.where({$and: filters});
     }
 
     applySelect(query, options, req);
     applyPopulate(query, options, req);
     applySort(query, options, req);
 
-    if (self.options.filter) {
-      query = query.where(self.options.filter(req, res));
-      countQuery = countQuery.where(self.options.filter(req, res));
-    }
-    
-    if (options.filter) {
-      query = query.where(options.filter(req, res));
-      countQuery = countQuery.where(options.filter(req, res));
-    }
-    
     var page = Number(req.query.skip) >= 0 ? Number(req.query.skip) : 0;
 
     // pageSize parameter in queryString overrides one in the code. Must be number between [1-options.maxPageSize]
@@ -399,17 +402,22 @@ Resource.prototype.detail = function (options) {
     find[self.options.queryString] = req.params.id;
 
     var query = self.Model.findOne(find);
-
-    applySelect(query, options, req);
-    applyPopulate(query, options, req);
+    var filters = [];
 
     if (self.options.filter) {
-      query = query.where(self.options.filter(req, res));
+      filters.push(self.options.filter(req, res));
     }
 
     if (options.filter) {
-      query = query.where(options.filter(req, res));
+      filters.push(options.filter(req, res));
     }
+
+    if (filters.length) {
+      query.where({$and: filters});
+    }
+
+    applySelect(query, options, req);
+    applyPopulate(query, options, req);
 
     async.waterfall([
       execQuery(query),
@@ -463,18 +471,23 @@ Resource.prototype.update = function (options) {
     options.fieldsToBeRemoved.forEach(function(field) {
       delete req.body[field];
     });
-    
+
     var find = {};
     find[self.options.queryString] = req.params.id;
 
     var query = self.Model.findOne(find);
+    var filters = [];
 
     if (self.options.filter) {
-      query = query.where(self.options.filter(req, res));
+      filters.push(self.options.filter(req, res));
     }
 
     if (options.filter) {
-      query = query.where(options.filter(req, res));
+      filters.push(options.filter(req, res));
+    }
+
+    if (filters.length) {
+      query.where({$and: filters});
     }
 
     query.exec(function (err, model) {
@@ -514,13 +527,18 @@ Resource.prototype.remove = function (options) {
     find[self.options.queryString] = req.params.id;
 
     var query = self.Model.findOne(find);
+    var filters = [];
 
     if (self.options.filter) {
-      query = query.where(self.options.filter(req, res));
+      filters.push(self.options.filter(req, res));
     }
 
     if (options.filter) {
-      query = query.where(options.filter(req, res));
+      filters.push(options.filter(req, res));
+    }
+
+    if (filters.length) {
+      query.where({$and: filters});
     }
 
     query.exec(function (err, model) {
